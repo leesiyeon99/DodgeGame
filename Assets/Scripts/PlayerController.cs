@@ -1,19 +1,16 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using TreeEditor;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] Rigidbody rigid;
     [SerializeField] float moveSpeed;
-
+    [SerializeField] float rotateSpeed;
     public event Action OnDied;
 
     private void Update()
     {
-        
+
         Move();
     }
 
@@ -30,7 +27,7 @@ public class PlayerController : MonoBehaviour
         Debug.Log($"{x}, {z}");
 
         // 정규화: 크기가 1이 아닌 벡터의 크기를 1로 만들기
-        Vector3 moveDir = new Vector3 (x,0,z);
+        Vector3 moveDir = new Vector3(x, 0, z);
         //moveDir.Normalize();
         //= new Vector3 (x,0,z).Normalized;
         if (moveDir.magnitude > 1) //magnitude: 백터의 크기
@@ -41,6 +38,8 @@ public class PlayerController : MonoBehaviour
         // 리지드바디: 물리엔진담당의 컴포넌트
         // AddForce, AddTorque, velocity, angularVelocity
         rigid.velocity = moveDir * moveSpeed;
+        if (moveDir == Vector3.zero) { return; }
+        rigid.rotation = Quaternion.Lerp(rigid.rotation, Quaternion.LookRotation(rigid.velocity), rotateSpeed * Time.deltaTime);
     }
 
     public void TakeHit()
