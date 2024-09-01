@@ -1,66 +1,31 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public enum GameState { Ready, Running, GameOver }
+    public static GameManager Instance { get; private set; }
 
-    [SerializeField] GameState curState;
-    [SerializeField] PlayerController player;
-    [SerializeField] TowerController[] towers;
+    [SerializeField] public int bestScore { get; private set; }
 
-    [SerializeField] GameObject ready;
-    [SerializeField] GameObject over;
-
-    private void Start()
+    private void Awake()
     {
-        curState = GameState.Ready;
-        //씬에 있는 모든 타워컨트롤러 찾아주기
-        towers = FindObjectsOfType<TowerController>();
-
-        //GameObject playerGameObj = GameObject.FindGameObjectWithTag("Player");
-        //PlayerController playerController = playerGameObj.GetComponent<PlayerController>();
-
-        player = FindObjectOfType<PlayerController>();
-        player.OnDied += GameOver;
-        ready.SetActive(true);
-        over.SetActive(false);
-
-    }
-
-    private void Update()
-    {
-        if (curState == GameState.Ready && Input.anyKeyDown)
+        if (Instance == null)
         {
-            GameStart();
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
-        else if (curState == GameState.GameOver && Input.GetKeyDown(KeyCode.R))
+        else if (Instance != null)
         {
-            SceneManager.LoadScene("DodgeScene");
+            Destroy(gameObject);
         }
     }
 
-    public void GameStart()
+    public void SetBestScore(int score)
     {
-        curState = GameState.Running;
-        //타워들 공격개시
-        foreach (var t in towers)
+        if (score > bestScore)
         {
-            t.StartAttack();
+            bestScore = score;
         }
-        ready.SetActive(false);
-        over.SetActive(false);
-    }
-
-    public void GameOver()
-    {
-        curState = GameState.GameOver;
-        foreach(var t in towers)
-        {
-            t.StopAttack();
-        }
-        ready.SetActive(false);
-        over.SetActive(true);
     }
 }
